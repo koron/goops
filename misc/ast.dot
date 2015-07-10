@@ -1,0 +1,76 @@
+// $ twopi -Goverlap=prism -Tpng misc/ast.dot -o misc/ast.png
+
+digraph hierarchy {
+  N [label="Node", peripheries=2];
+  Expr [peripheries=2];
+  Stmt [peripheries=2];
+  Decl [peripheries=2];
+  N -> Expr;
+  N -> Stmt;
+  N -> Decl;
+
+  N -> Comment;
+  N -> CommentGroup;
+  N -> Field;
+  N -> FieldList;
+
+  Expr -> BadExpr;
+  Expr -> Ident;
+  Expr -> Ellipsis;
+  Expr -> BasicLit;
+  Expr -> FuncLit;
+  Expr -> CompositeLit;
+  Expr -> ParenExpr;
+  Expr -> SelectorExpr;
+  Expr -> IndexExpr;
+  Expr -> SliceExpr;
+  Expr -> TypeAssertExpr;
+  Expr -> CallExpr;
+  Expr -> StarExpr;
+  Expr -> UnaryExpr;
+  Expr -> BinaryExpr;
+  Expr -> KeyValueExpr;
+  Expr -> ArrayType;
+  Expr -> StructType;
+  Expr -> FuncType;
+  Expr -> InterfaceType;
+  Expr -> MapType;
+  Expr -> ChanType;
+
+  Stmt -> BadStmt;
+  Stmt -> DeclStmt;
+  Stmt -> EmptyStmt;
+  Stmt -> LabeledStmt;
+  Stmt -> ExprStmt;
+  Stmt -> SendStmt;
+  Stmt -> IncDecStmt;
+  Stmt -> AssignStmt;
+  Stmt -> GoStmt;
+  Stmt -> DeferStmt;
+  Stmt -> ReturnStmt;
+  Stmt -> BranchStmt;
+  Stmt -> BlockStmt;
+  Stmt -> IfStmt;
+  Stmt -> CaseClause;
+  Stmt -> SwitchStmt;
+  Stmt -> TypeSwitchStmt;
+  Stmt -> CommClause;
+  Stmt -> SelectStmt;
+  Stmt -> ForStmt;
+  Stmt -> RangeStmt;
+
+  Spec [peripheries=2];
+  N -> Spec;
+  Spec -> ImportSpec;
+  Spec -> ValueSpec;
+  Spec -> TypeSpec;
+
+  Decl -> BadDecl;
+  Decl -> GenDecl;
+  Decl -> FuncDecl;
+
+  N -> File;
+  N -> Package;
+}
+
+// vim:set ts=8 sts=2 sw=2 tw=0 et:

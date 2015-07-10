@@ -1,6 +1,9 @@
 package main
 
-import "io"
+import (
+	"go/ast"
+	"io"
+)
 
 // JavaPrinter is printer for Java.
 var JavaPrinter = &javaPrinter{}
@@ -8,7 +11,7 @@ var JavaPrinter = &javaPrinter{}
 type javaPrinter struct {
 }
 
-func (p *javaPrinter) Fprint(output io.Writer, node interface{}) error {
+func (p *javaPrinter) Fprint(output io.Writer, list []ast.Stmt) error {
 	// TODO:
 	return nil
 }

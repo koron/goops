@@ -13,39 +13,44 @@ type dumpPrinter struct {
 
 func (p *dumpPrinter) Fprint(w io.Writer, list []ast.Stmt) error {
 	c := &dumpContext{
-		codePrinterContext{
-			output:       w,
-			indentString: "  ",
+		printer: indentPrinter{
+			Output:       w,
+			IndentString: "  ",
 		},
 	}
 	for _, x := range list {
 		c.printStmt(x)
-		if c.err != nil {
-			break
+		if err := c.printer.Error(); err != nil {
+			return err
 		}
 	}
-	return c.err
+	return nil
 }
 
 type dumpContext struct {
-	codePrinterContext
+	printer indentPrinter
+}
+
+func (c *dumpContext) emit(f string, a ...interface{}) {
+	c.printer.Printf(f, a...)
+	c.printer.Println()
 }
 
 func (c *dumpContext) nodeStart(n string) {
-	c.Emit("%s {", n)
+	c.emit("%s {", n)
 }
 
 func (c *dumpContext) nodeEnd() {
-	c.Emit("}")
+	c.emit("}")
 }
 
 func (c *dumpContext) propStart(n string) {
-	c.Emit("+-%s:", n)
-	c.Indent()
+	c.emit("+-%s:", n)
+	c.printer.Indent()
 }
 
 func (c *dumpContext) propEnd() {
-	c.Outdent()
+	c.printer.Outdent()
 }
 
 func (c *dumpContext) emitProp(n string, v interface{}) {
@@ -78,7 +83,7 @@ func (c *dumpContext) emitProp(n string, v interface{}) {
 		}
 		return
 	}
-	c.Emit("+-%s: %v", n, v)
+	c.emit("+-%s: %v", n, v)
 }
 
 func (c *dumpContext) emitPropFn(n string, f func()) {
@@ -137,7 +142,7 @@ func (c *dumpContext) printExpr(expr ast.Expr) {
 	case *ast.ChanType:
 		c.printChanType(x)
 	default:
-		c.Emit("(Expr) %#v", expr)
+		c.emit("(Expr) %#v", expr)
 	}
 }
 
@@ -342,7 +347,7 @@ func (c *dumpContext) printStmt(stmt ast.Stmt) {
 	case *ast.RangeStmt:
 		c.printRangeStmt(x)
 	default:
-		c.Emit("(Stmt) %#v", stmt)
+		c.emit("(Stmt) %#v", stmt)
 	}
 }
 
@@ -504,7 +509,7 @@ func (c *dumpContext) printDecl(decl ast.Decl) {
 	case *ast.FuncDecl:
 		c.printFuncDecl(x)
 	default:
-		c.Emit("(Decl) %#v", decl)
+		c.emit("(Decl) %#v", decl)
 	}
 }
 
@@ -543,7 +548,7 @@ func (c *dumpContext) printSpec(spec ast.Spec) {
 	case *ast.TypeSpec:
 		c.printTypeSpec(x)
 	default:
-		c.Emit("(Spec) %#v", spec)
+		c.emit("(Spec) %#v", spec)
 	}
 }
 
@@ -599,7 +604,7 @@ func (c *dumpContext) printNode(node ast.Node) {
 	case *ast.Package:
 		c.printPackage(x)
 	default:
-		c.Emit("(Node) %#v", node)
+		c.emit("(Node) %#v", node)
 	}
 }
 
@@ -633,7 +638,7 @@ func (c *dumpContext) printFieldList(x *ast.FieldList) {
 
 func (c *dumpContext) printFile(x *ast.File) {
 	c.nodeStart("File")
-	c.emitProp("Doc",x.Doc)
+	c.emitProp("Doc", x.Doc)
 	c.emitProp("Name", x.Name)
 	c.emitProp("Decls", x.Decls)
 	c.emitProp("Scope", x.Scope)

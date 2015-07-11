@@ -18,8 +18,8 @@ func (p *dumpPrinter) Fprint(w io.Writer, list []ast.Stmt) error {
 			indentString: "  ",
 		},
 	}
-	for _, stmt := range list {
-		c.printStmt(stmt)
+	for _, x := range list {
+		c.printStmt(x)
 		if c.err != nil {
 			break
 		}
@@ -58,21 +58,21 @@ func (c *dumpContext) emitProp(n string, v interface{}) {
 		c.propEnd()
 		return
 	}
-	if array, ok := v.([]ast.Expr); ok {
-		if len(array) > 0 {
+	if list, ok := v.([]ast.Expr); ok {
+		if len(list) > 0 {
 			c.propStart(n)
-			for _, item := range array {
-				c.printExpr(item)
+			for _, x := range list {
+				c.printExpr(x)
 			}
 			c.propEnd()
 		}
 		return
 	}
-	if array, ok := v.([]ast.Stmt); ok {
-		if len(array) > 0 {
+	if list, ok := v.([]ast.Stmt); ok {
+		if len(list) > 0 {
 			c.propStart(n)
-			for _, item := range array {
-				c.printStmt(item)
+			for _, x := range list {
+				c.printStmt(x)
 			}
 			c.propEnd()
 		}
@@ -91,454 +91,563 @@ func (c *dumpContext) emitPropFn(n string, f func()) {
 // Expr
 
 func (c *dumpContext) printExpr(expr ast.Expr) {
-	switch e := expr.(type) {
+	switch x := expr.(type) {
 	case *ast.BadExpr:
-		c.printBadExpr(e)
+		c.printBadExpr(x)
 	case *ast.Ident:
-		c.printIdent(e)
+		c.printIdent(x)
 	case *ast.Ellipsis:
-		c.printEllipsis(e)
+		c.printEllipsis(x)
 	case *ast.BasicLit:
-		c.printBasicLit(e)
+		c.printBasicLit(x)
 	case *ast.FuncLit:
-		c.printFuncLit(e)
+		c.printFuncLit(x)
 	case *ast.CompositeLit:
-		c.printCompositeLit(e)
+		c.printCompositeLit(x)
 	case *ast.ParenExpr:
-		c.printParenExpr(e)
+		c.printParenExpr(x)
 	case *ast.SelectorExpr:
-		c.printSelectorExpr(e)
+		c.printSelectorExpr(x)
 	case *ast.IndexExpr:
-		c.printIndexExpr(e)
+		c.printIndexExpr(x)
 	case *ast.SliceExpr:
-		c.printSliceExpr(e)
+		c.printSliceExpr(x)
 	case *ast.TypeAssertExpr:
-		c.printTypeAssertExpr(e)
+		c.printTypeAssertExpr(x)
 	case *ast.CallExpr:
-		c.printCallExpr(e)
+		c.printCallExpr(x)
 	case *ast.StarExpr:
-		c.printStarExpr(e)
+		c.printStarExpr(x)
 	case *ast.UnaryExpr:
-		c.printUnaryExpr(e)
+		c.printUnaryExpr(x)
 	case *ast.BinaryExpr:
-		c.printBinaryExpr(e)
+		c.printBinaryExpr(x)
 	case *ast.KeyValueExpr:
-		c.printKeyValueExpr(e)
+		c.printKeyValueExpr(x)
 	case *ast.ArrayType:
-		c.printArrayType(e)
+		c.printArrayType(x)
 	case *ast.StructType:
-		c.printStructType(e)
+		c.printStructType(x)
 	case *ast.FuncType:
-		c.printFuncType(e)
+		c.printFuncType(x)
 	case *ast.InterfaceType:
-		c.printInterfaceType(e)
+		c.printInterfaceType(x)
 	case *ast.MapType:
-		c.printMapType(e)
+		c.printMapType(x)
 	case *ast.ChanType:
-		c.printChanType(e)
+		c.printChanType(x)
 	default:
 		c.Emit("(Expr) %#v", expr)
 	}
 }
 
-func (c *dumpContext) printBadExpr(expr *ast.BadExpr) {
-	// TODO:
-	c.Emit("(BadExpr) %#v", expr)
+func (c *dumpContext) printBadExpr(x *ast.BadExpr) {
+	c.nodeStart("BadExpr")
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printIdent(expr *ast.Ident) {
+func (c *dumpContext) printIdent(x *ast.Ident) {
 	c.nodeStart("Ident")
-	c.emitProp("Name", expr.Name)
-	c.emitProp("Obj", expr.Obj)
+	c.emitProp("Name", x.Name)
+	c.emitProp("Obj", x.Obj)
 	c.nodeEnd()
 }
 
-func (c *dumpContext) printEllipsis(expr *ast.Ellipsis) {
-	// TODO:
-	c.Emit("(Ellipsis) %#v", expr)
+func (c *dumpContext) printEllipsis(x *ast.Ellipsis) {
+	c.nodeStart("Ellipsis")
+	c.emitProp("Elt", x.Elt)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printBasicLit(expr *ast.BasicLit) {
+func (c *dumpContext) printBasicLit(x *ast.BasicLit) {
 	c.nodeStart("BasicLit")
-	c.emitProp("Kind", expr.Kind)
-	c.emitProp("Value", expr.Value)
+	c.emitProp("Kind", x.Kind)
+	c.emitProp("Value", x.Value)
 	c.nodeEnd()
 }
 
-func (c *dumpContext) printFuncLit(expr *ast.FuncLit) {
-	// TODO:
-	c.Emit("(FuncLit) %#v", expr)
+func (c *dumpContext) printFuncLit(x *ast.FuncLit) {
+	c.nodeStart("FuncLit")
+	c.emitProp("Type", x.Type)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printCompositeLit(expr *ast.CompositeLit) {
-	// TODO:
-	c.Emit("(CompositeLit) %#v", expr)
+func (c *dumpContext) printCompositeLit(x *ast.CompositeLit) {
+	c.nodeStart("CompositeLit")
+	c.emitProp("Type", x.Type)
+	c.emitProp("Elts", x.Elts)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printParenExpr(expr *ast.ParenExpr) {
-	// TODO:
-	c.Emit("(ParenExpr) %#v", expr)
+func (c *dumpContext) printParenExpr(x *ast.ParenExpr) {
+	c.nodeStart("ParenExpr")
+	c.emitProp("X", x.X)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printSelectorExpr(expr *ast.SelectorExpr) {
-	// TODO:
-	c.Emit("(SelectorExpr) %#v", expr)
+func (c *dumpContext) printSelectorExpr(x *ast.SelectorExpr) {
+	c.nodeStart("SelectorExpr")
+	c.emitProp("X", x.X)
+	c.emitProp("Sel", x.Sel)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printIndexExpr(expr *ast.IndexExpr) {
-	// TODO:
-	c.Emit("(IndexExpr) %#v", expr)
+func (c *dumpContext) printIndexExpr(x *ast.IndexExpr) {
+	c.nodeStart("IndexExpr")
+	c.emitProp("X", x.X)
+	c.emitProp("Index", x.Index)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printSliceExpr(expr *ast.SliceExpr) {
-	// TODO:
-	c.Emit("(SliceExpr) %#v", expr)
+func (c *dumpContext) printSliceExpr(x *ast.SliceExpr) {
+	c.nodeStart("SliceExpr")
+	c.emitProp("X", x.X)
+	c.emitProp("Low", x.Low)
+	c.emitProp("High", x.High)
+	c.emitProp("Max", x.Max)
+	c.emitProp("Slice3", x.Slice3)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printTypeAssertExpr(expr *ast.TypeAssertExpr) {
-	// TODO:
-	c.Emit("(TypeAssertExpr) %#v", expr)
+func (c *dumpContext) printTypeAssertExpr(x *ast.TypeAssertExpr) {
+	c.nodeStart("TypeAssertExpr")
+	c.emitProp("X", x.X)
+	c.emitProp("Type", x.Type)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printCallExpr(expr *ast.CallExpr) {
-	// TODO:
-	c.Emit("(CallExpr) %#v", expr)
+func (c *dumpContext) printCallExpr(x *ast.CallExpr) {
+	c.nodeStart("CallExpr")
+	c.emitProp("Func", x.Fun)
+	c.emitProp("Args", x.Args)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printStarExpr(expr *ast.StarExpr) {
-	// TODO:
-	c.Emit("(StarExpr) %#v", expr)
+func (c *dumpContext) printStarExpr(x *ast.StarExpr) {
+	c.nodeStart("StarExpr")
+	c.emitProp("X", x.X)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printUnaryExpr(expr *ast.UnaryExpr) {
-	// TODO:
-	c.Emit("(UnaryExpr) %#v", expr)
+func (c *dumpContext) printUnaryExpr(x *ast.UnaryExpr) {
+	c.nodeStart("UnaryExpr")
+	c.emitProp("Op", x.Op)
+	c.emitProp("X", x.X)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printBinaryExpr(expr *ast.BinaryExpr) {
+func (c *dumpContext) printBinaryExpr(x *ast.BinaryExpr) {
 	c.nodeStart("BinaryExpr")
-	c.emitProp("X", expr.X)
-	c.emitProp("Op", expr.Op)
-	c.emitProp("Y", expr.Y)
+	c.emitProp("X", x.X)
+	c.emitProp("Op", x.Op)
+	c.emitProp("Y", x.Y)
 	c.nodeEnd()
 }
 
-func (c *dumpContext) printKeyValueExpr(expr *ast.KeyValueExpr) {
-	// TODO:
-	c.Emit("(KeyValueExpr) %#v", expr)
+func (c *dumpContext) printKeyValueExpr(x *ast.KeyValueExpr) {
+	c.nodeStart("KeyValueExpr")
+	c.emitProp("Key", x.Key)
+	c.emitProp("Value", x.Value)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printArrayType(expr *ast.ArrayType) {
-	// TODO:
-	c.Emit("(ArrayType) %#v", expr)
+func (c *dumpContext) printArrayType(x *ast.ArrayType) {
+	c.nodeStart("ArrayType")
+	c.emitProp("Len", x.Len)
+	c.emitProp("Elt", x.Elt)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printStructType(expr *ast.StructType) {
-	// TODO:
-	c.Emit("(StructType) %#v", expr)
+func (c *dumpContext) printStructType(x *ast.StructType) {
+	c.nodeStart("StructType")
+	c.emitProp("FieldList", x.Fields)
+	c.emitProp("Incomplete", x.Incomplete)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printFuncType(expr *ast.FuncType) {
-	// TODO:
-	c.Emit("(FuncType) %#v", expr)
+func (c *dumpContext) printFuncType(x *ast.FuncType) {
+	c.nodeStart("FuncType")
+	c.emitProp("Params", x.Params)
+	c.emitProp("Results", x.Results)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printInterfaceType(expr *ast.InterfaceType) {
-	// TODO:
-	c.Emit("(InterfaceType) %#v", expr)
+func (c *dumpContext) printInterfaceType(x *ast.InterfaceType) {
+	c.nodeStart("InterfaceType")
+	c.emitProp("Methods", x.Methods)
+	c.emitProp("Incomplete", x.Incomplete)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printMapType(expr *ast.MapType) {
-	// TODO:
-	c.Emit("(MapType) %#v", expr)
+func (c *dumpContext) printMapType(x *ast.MapType) {
+	c.nodeStart("MapType")
+	c.emitProp("Key", x.Key)
+	c.emitProp("Value", x.Value)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printChanType(expr *ast.ChanType) {
-	// TODO:
-	c.Emit("(ChanType) %#v", expr)
+func (c *dumpContext) printChanType(x *ast.ChanType) {
+	c.nodeStart("ChanType")
+	c.emitProp("Dir", x.Dir)
+	c.emitProp("Value", x.Value)
+	c.nodeEnd()
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // Stmt
 
 func (c *dumpContext) printStmt(stmt ast.Stmt) {
-	switch s := stmt.(type) {
+	switch x := stmt.(type) {
 	case *ast.BadStmt:
-		c.printBadStmt(s)
+		c.printBadStmt(x)
 	case *ast.DeclStmt:
-		c.printDeclStmt(s)
+		c.printDeclStmt(x)
 	case *ast.EmptyStmt:
-		c.printEmptyStmt(s)
+		c.printEmptyStmt(x)
 	case *ast.LabeledStmt:
-		c.printLabeledStmt(s)
+		c.printLabeledStmt(x)
 	case *ast.ExprStmt:
-		c.printExprStmt(s)
+		c.printExprStmt(x)
 	case *ast.SendStmt:
-		c.printSendStmt(s)
+		c.printSendStmt(x)
 	case *ast.IncDecStmt:
-		c.printIncDecStmt(s)
+		c.printIncDecStmt(x)
 	case *ast.AssignStmt:
-		c.printAssignStmt(s)
+		c.printAssignStmt(x)
 	case *ast.GoStmt:
-		c.printGoStmt(s)
+		c.printGoStmt(x)
 	case *ast.DeferStmt:
-		c.printDeferStmt(s)
+		c.printDeferStmt(x)
 	case *ast.ReturnStmt:
-		c.printReturnStmt(s)
+		c.printReturnStmt(x)
 	case *ast.BranchStmt:
-		c.printBranchStmt(s)
+		c.printBranchStmt(x)
 	case *ast.BlockStmt:
-		c.printBlockStmt(s)
+		c.printBlockStmt(x)
 	case *ast.IfStmt:
-		c.printIfStmt(s)
+		c.printIfStmt(x)
 	case *ast.CaseClause:
-		c.printCaseClause(s)
+		c.printCaseClause(x)
 	case *ast.SwitchStmt:
-		c.printSwitchStmt(s)
+		c.printSwitchStmt(x)
 	case *ast.TypeSwitchStmt:
-		c.printTypeSwitchStmt(s)
+		c.printTypeSwitchStmt(x)
 	case *ast.CommClause:
-		c.printCommClause(s)
+		c.printCommClause(x)
 	case *ast.SelectStmt:
-		c.printSelectStmt(s)
+		c.printSelectStmt(x)
 	case *ast.ForStmt:
-		c.printForStmt(s)
+		c.printForStmt(x)
 	case *ast.RangeStmt:
-		c.printRangeStmt(s)
+		c.printRangeStmt(x)
 	default:
 		c.Emit("(Stmt) %#v", stmt)
 	}
 }
 
-func (c *dumpContext) printBadStmt(stmt *ast.BadStmt) {
-	// TODO:
-	c.Emit("(BadStmt) %#v", stmt)
+func (c *dumpContext) printBadStmt(x *ast.BadStmt) {
+	c.nodeStart("BadStmt")
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printDeclStmt(stmt *ast.DeclStmt) {
-	// TODO:
-	c.Emit("(DeclStmt) %#v", stmt)
+func (c *dumpContext) printDeclStmt(x *ast.DeclStmt) {
+	c.nodeStart("DeclStmt")
+	c.emitProp("Decl", x.Decl)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printEmptyStmt(stmt *ast.EmptyStmt) {
-	// TODO:
-	c.Emit("(EmptyStmt) %#v", stmt)
+func (c *dumpContext) printEmptyStmt(x *ast.EmptyStmt) {
+	c.nodeStart("EmptyStmt")
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printLabeledStmt(stmt *ast.LabeledStmt) {
-	// TODO:
-	c.Emit("(LabeledStmt) %#v", stmt)
+func (c *dumpContext) printLabeledStmt(x *ast.LabeledStmt) {
+	c.nodeStart("LabeledStmt")
+	c.emitProp("Label", x.Label)
+	c.emitProp("Stmt", x.Stmt)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printExprStmt(stmt *ast.ExprStmt) {
-	// TODO:
-	c.Emit("(ExprStmt) %#v", stmt)
+func (c *dumpContext) printExprStmt(x *ast.ExprStmt) {
+	c.nodeStart("ExprStmt")
+	c.emitProp("X", x.X)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printSendStmt(stmt *ast.SendStmt) {
-	// TODO:
-	c.Emit("(SendStmt) %#v", stmt)
+func (c *dumpContext) printSendStmt(x *ast.SendStmt) {
+	c.nodeStart("SendStmt")
+	c.emitProp("Chan", x.Chan)
+	c.emitProp("Value", x.Value)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printIncDecStmt(stmt *ast.IncDecStmt) {
-	// TODO:
-	c.Emit("(IncDecStmt) %#v", stmt)
+func (c *dumpContext) printIncDecStmt(x *ast.IncDecStmt) {
+	c.nodeStart("IncDecStmt")
+	c.emitProp("X", x.X)
+	c.emitProp("Tok", x.Tok)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printAssignStmt(stmt *ast.AssignStmt) {
-	// TODO:
-	c.Emit("(AssignStmt) %#v", stmt)
+func (c *dumpContext) printAssignStmt(x *ast.AssignStmt) {
+	c.nodeStart("AssignStmt")
+	c.emitProp("Lhs", x.Lhs)
+	c.emitProp("Tok", x.Tok)
+	c.emitProp("Rhs", x.Rhs)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printGoStmt(stmt *ast.GoStmt) {
-	// TODO:
-	c.Emit("(GoStmt) %#v", stmt)
+func (c *dumpContext) printGoStmt(x *ast.GoStmt) {
+	c.nodeStart("GoStmt")
+	c.emitProp("Call", x.Call)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printDeferStmt(stmt *ast.DeferStmt) {
-	// TODO:
-	c.Emit("(DeferStmt) %#v", stmt)
+func (c *dumpContext) printDeferStmt(x *ast.DeferStmt) {
+	c.nodeStart("DeferStmt")
+	c.emitProp("Call", x.Call)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printReturnStmt(stmt *ast.ReturnStmt) {
+func (c *dumpContext) printReturnStmt(x *ast.ReturnStmt) {
 	c.nodeStart("ReturnStmt")
-	c.emitProp("Results", stmt.Results)
+	c.emitProp("Results", x.Results)
 	c.nodeEnd()
 }
 
-func (c *dumpContext) printBranchStmt(stmt *ast.BranchStmt) {
-	// TODO:
-	c.Emit("(BranchStmt) %#v", stmt)
+func (c *dumpContext) printBranchStmt(x *ast.BranchStmt) {
+	c.nodeStart("BranchStmt")
+	c.emitProp("Tok", x.Tok)
+	c.emitProp("Label", x.Label)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printBlockStmt(s *ast.BlockStmt) {
+func (c *dumpContext) printBlockStmt(x *ast.BlockStmt) {
 	c.nodeStart("BlockStmt")
-	c.emitProp("List", s.List)
+	c.emitProp("List", x.List)
 	c.nodeEnd()
 }
 
-func (c *dumpContext) printIfStmt(s *ast.IfStmt) {
+func (c *dumpContext) printIfStmt(x *ast.IfStmt) {
 	c.nodeStart("IfStmt")
-	c.emitProp("Init", s.Init)
-	c.emitProp("Cond", s.Cond)
-	c.emitProp("Body", s.Body)
-	c.emitProp("Else", s.Else)
+	c.emitProp("Init", x.Init)
+	c.emitProp("Cond", x.Cond)
+	c.emitProp("Body", x.Body)
+	c.emitProp("Else", x.Else)
 	c.nodeEnd()
 }
 
-func (c *dumpContext) printCaseClause(stmt *ast.CaseClause) {
-	// TODO:
-	c.Emit("(CaseClause) %#v", stmt)
+func (c *dumpContext) printCaseClause(x *ast.CaseClause) {
+	c.nodeStart("CaseClause")
+	c.emitProp("List", x.List)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printSwitchStmt(stmt *ast.SwitchStmt) {
-	// TODO:
-	c.Emit("(SwitchStmt) %#v", stmt)
+func (c *dumpContext) printSwitchStmt(x *ast.SwitchStmt) {
+	c.nodeStart("SwitchStmt")
+	c.emitProp("Init", x.Init)
+	c.emitProp("Tag", x.Tag)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printTypeSwitchStmt(stmt *ast.TypeSwitchStmt) {
-	// TODO:
-	c.Emit("(TypeSwitchStmt) %#v", stmt)
+func (c *dumpContext) printTypeSwitchStmt(x *ast.TypeSwitchStmt) {
+	c.nodeStart("TypeSwitchStmt")
+	c.emitProp("Init", x.Init)
+	c.emitProp("Assign", x.Assign)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printCommClause(stmt *ast.CommClause) {
-	// TODO:
-	c.Emit("(CommClause) %#v", stmt)
+func (c *dumpContext) printCommClause(x *ast.CommClause) {
+	c.nodeStart("CommClause")
+	c.emitProp("Comm", x.Comm)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printSelectStmt(stmt *ast.SelectStmt) {
-	// TODO:
-	c.Emit("(SelectStmt) %#v", stmt)
+func (c *dumpContext) printSelectStmt(x *ast.SelectStmt) {
+	c.nodeStart("SelectStmt")
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printForStmt(stmt *ast.ForStmt) {
-	// TODO:
-	c.Emit("(ForStmt) %#v", stmt)
+func (c *dumpContext) printForStmt(x *ast.ForStmt) {
+	c.nodeStart("ForStmt")
+	c.emitProp("Init", x.Init)
+	c.emitProp("Cond", x.Cond)
+	c.emitProp("Post", x.Post)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printRangeStmt(stmt *ast.RangeStmt) {
-	// TODO:
-	c.Emit("(RangeStmt) %#v", stmt)
+func (c *dumpContext) printRangeStmt(x *ast.RangeStmt) {
+	c.nodeStart("RangeStmt")
+	c.emitProp("Key", x.Key)
+	c.emitProp("Value", x.Value)
+	c.emitProp("Tok", x.Tok)
+	c.emitProp("X", x.X)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // Decl
 
 func (c *dumpContext) printDecl(decl ast.Decl) {
-	switch d := decl.(type) {
+	switch x := decl.(type) {
 	case *ast.BadDecl:
-		c.printBadDecl(d)
+		c.printBadDecl(x)
 	case *ast.GenDecl:
-		c.printGenDecl(d)
+		c.printGenDecl(x)
 	case *ast.FuncDecl:
-		c.printFuncDecl(d)
+		c.printFuncDecl(x)
 	default:
 		c.Emit("(Decl) %#v", decl)
 	}
 }
 
-func (c *dumpContext) printBadDecl(decl *ast.BadDecl) {
-	// TODO:
-	c.Emit("(BadDecl) %#v", decl)
+func (c *dumpContext) printBadDecl(x *ast.BadDecl) {
+	c.nodeStart("BadDecl")
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printGenDecl(decl *ast.GenDecl) {
-	// TODO:
-	c.Emit("(GenDecl) %#v", decl)
+func (c *dumpContext) printGenDecl(x *ast.GenDecl) {
+	c.nodeStart("GenDecl")
+	c.emitProp("Doc", x.Doc)
+	c.emitProp("Tok", x.Tok)
+	c.emitProp("Specs", x.Specs)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printFuncDecl(decl *ast.FuncDecl) {
-	// TODO:
-	c.Emit("(FuncDecl) %#v", decl)
+func (c *dumpContext) printFuncDecl(x *ast.FuncDecl) {
+	c.nodeStart("FuncDecl")
+	c.emitProp("Doc", x.Doc)
+	c.emitProp("Recv", x.Recv)
+	c.emitProp("Name", x.Name)
+	c.emitProp("Type", x.Type)
+	c.emitProp("Body", x.Body)
+	c.nodeEnd()
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // Spec
 
 func (c *dumpContext) printSpec(spec ast.Spec) {
-	switch s := spec.(type) {
+	switch x := spec.(type) {
 	case *ast.ImportSpec:
-		c.printImportSpec(s)
+		c.printImportSpec(x)
 	case *ast.ValueSpec:
-		c.printValueSpec(s)
+		c.printValueSpec(x)
 	case *ast.TypeSpec:
-		c.printTypeSpec(s)
+		c.printTypeSpec(x)
 	default:
 		c.Emit("(Spec) %#v", spec)
 	}
 }
 
-func (c *dumpContext) printImportSpec(spec *ast.ImportSpec) {
-	// TODO:
-	c.Emit("(ImportSpec) %#v", spec)
+func (c *dumpContext) printImportSpec(x *ast.ImportSpec) {
+	c.nodeStart("ImportSpec")
+	c.emitProp("Doc", x.Doc)
+	c.emitProp("Name", x.Name)
+	c.emitProp("Path", x.Path)
+	c.emitProp("Comment", x.Comment)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printValueSpec(spec *ast.ValueSpec) {
-	// TODO:
-	c.Emit("(ValueSpec) %#v", spec)
+func (c *dumpContext) printValueSpec(x *ast.ValueSpec) {
+	c.nodeStart("ValueSpec")
+	c.emitProp("Doc", x.Doc)
+	c.emitProp("Names", x.Names)
+	c.emitProp("Type", x.Type)
+	c.emitProp("Values", x.Values)
+	c.emitProp("Comment", x.Comment)
 }
 
-func (c *dumpContext) printTypeSpec(spec *ast.TypeSpec) {
-	// TODO:
-	c.Emit("(TypeSpec) %#v", spec)
+func (c *dumpContext) printTypeSpec(x *ast.TypeSpec) {
+	c.nodeStart("TypeSpec")
+	c.emitProp("Doc", x.Doc)
+	c.emitProp("Name", x.Name)
+	c.emitProp("Type", x.Type)
+	c.emitProp("Comment", x.Comment)
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // Node
 
 func (c *dumpContext) printNode(node ast.Node) {
-	switch n := node.(type) {
+	switch x := node.(type) {
 	case ast.Expr:
-		c.printExpr(n)
+		c.printExpr(x)
 	case ast.Stmt:
-		c.printStmt(n)
+		c.printStmt(x)
 	case ast.Decl:
-		c.printDecl(n)
+		c.printDecl(x)
 	case ast.Spec:
-		c.printSpec(n)
+		c.printSpec(x)
 	case *ast.Comment:
-		c.printComment(n)
+		c.printComment(x)
 	case *ast.CommentGroup:
-		c.printCommentGroup(n)
+		c.printCommentGroup(x)
 	case *ast.Field:
-		c.printField(n)
+		c.printField(x)
 	case *ast.FieldList:
-		c.printFieldList(n)
+		c.printFieldList(x)
 	case *ast.File:
-		c.printFile(n)
+		c.printFile(x)
 	case *ast.Package:
-		c.printPackage(n)
+		c.printPackage(x)
 	default:
 		c.Emit("(Node) %#v", node)
 	}
 }
 
-func (c *dumpContext) printComment(node *ast.Comment) {
-	// TODO:
-	c.Emit("(Comment) %#v", node)
+func (c *dumpContext) printComment(x *ast.Comment) {
+	c.nodeStart("Comment")
+	c.emitProp("Text", x.Text)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printCommentGroup(node *ast.CommentGroup) {
-	// TODO:
-	c.Emit("(CommentGroup) %#v", node)
+func (c *dumpContext) printCommentGroup(x *ast.CommentGroup) {
+	c.nodeStart("CommentGroup")
+	c.emitProp("List", x.List)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printField(node *ast.Field) {
-	// TODO:
-	c.Emit("(Field) %#v", node)
+func (c *dumpContext) printField(x *ast.Field) {
+	c.nodeStart("Field")
+	c.emitProp("Doc", x.Doc)
+	c.emitProp("Names", x.Names)
+	c.emitProp("Type", x.Type)
+	c.emitProp("Tag", x.Tag)
+	c.emitProp("Comment", x.Comment)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printFieldList(node *ast.FieldList) {
-	// TODO:
-	c.Emit("(FieldList) %#v", node)
+func (c *dumpContext) printFieldList(x *ast.FieldList) {
+	c.nodeStart("FieldList")
+	c.emitProp("List", x.List)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printFile(node *ast.File) {
-	// TODO:
-	c.Emit("(File) %#v", node)
+func (c *dumpContext) printFile(x *ast.File) {
+	c.nodeStart("File")
+	c.emitProp("Doc",x.Doc)
+	c.emitProp("Name", x.Name)
+	c.emitProp("Decls", x.Decls)
+	c.emitProp("Scope", x.Scope)
+	c.emitProp("Imports", x.Imports)
+	c.emitProp("Unresolved", x.Unresolved)
+	c.emitProp("Comments", x.Comments)
+	c.nodeEnd()
 }
 
-func (c *dumpContext) printPackage(node *ast.Package) {
-	// TODO:
-	c.Emit("(Package) %#v", node)
+func (c *dumpContext) printPackage(x *ast.Package) {
+	c.nodeStart("Package")
+	c.emitProp("Name", x.Name)
+	c.emitProp("Scope", x.Scope)
+	c.emitProp("Imports", x.Imports)
+	c.emitProp("Files", x.Files)
+	c.nodeEnd()
 }

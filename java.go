@@ -31,6 +31,8 @@ func (p *javaPrinter) Fprint(output io.Writer, list []ast.Stmt) error {
 type javaContext struct {
 	p indentPrinter
 	e error
+
+	disableEOL bool
 }
 
 func (c *javaContext) err() error {
@@ -220,7 +222,7 @@ func (c *javaContext) printBinaryExpr(x *ast.BinaryExpr) error {
 	}
 	// normal case
 	c.printExpr(x.X)
-	c.p.Print(x.Op)
+	c.p.Printf(" %s ", x.Op)
 	c.printExpr(x.Y)
 	return c.err()
 }
@@ -364,17 +366,17 @@ func (c *javaContext) printSendStmt(x *ast.SendStmt) error {
 }
 
 func (c *javaContext) printIncDecStmt(x *ast.IncDecStmt) error {
-	c.nodeStart("IncDecStmt")
-	c.emitProp("X", x.X)
-	c.emitProp("Tok", x.Tok)
-	return c.nodeEnd()
+	c.printExpr(x.X)
+	c.p.Print(x.Tok)
+	c.printEOL()
+	return c.err()
 }
 
 func (c *javaContext) printAssignStmt(x *ast.AssignStmt) error {
-	c.nodeStart("AssignStmt")
-	c.emitProp("Lhs", x.Lhs)
-	c.emitProp("Tok", x.Tok)
-	c.emitProp("Rhs", x.Rhs)
+	for i, lhs := range x.Lhs {
+		c.printAssign(lhs, x.Rhs[i], x.Tok)
+		c.printEOL()
+	}
 	return c.nodeEnd()
 }
 
@@ -393,11 +395,10 @@ func (c *javaContext) printDeferStmt(x *ast.DeferStmt) error {
 func (c *javaContext) printReturnStmt(x *ast.ReturnStmt) error {
 	switch len(x.Results) {
 	case 0:
-		c.p.Println("return;")
+		c.p.Print("return")
 	case 1:
 		c.p.Print("return ")
 		c.printExpr(x.Results[0])
-		c.p.Println(";")
 	default:
 		c.p.Println("// FIXME: return accepts only one value.")
 		c.p.Print("return (")
@@ -410,8 +411,9 @@ func (c *javaContext) printReturnStmt(x *ast.ReturnStmt) error {
 			}
 			c.printExpr(expr)
 		}
-		c.p.Println(");")
+		c.p.Print(")")
 	}
+	c.printEOL()
 	return c.err()
 }
 
@@ -492,12 +494,26 @@ func (c *javaContext) printSelectStmt(x *ast.SelectStmt) error {
 }
 
 func (c *javaContext) printForStmt(x *ast.ForStmt) error {
-	c.nodeStart("ForStmt")
-	c.emitProp("Init", x.Init)
-	c.emitProp("Cond", x.Cond)
-	c.emitProp("Post", x.Post)
-	c.emitProp("Body", x.Body)
-	return c.nodeEnd()
+	c.disableEOL = true
+	c.p.Print("for (")
+	if x.Init != nil {
+		c.printStmt(x.Init)
+		c.p.Print("; ")
+	}
+	if x.Cond != nil {
+		c.printExpr(x.Cond)
+		c.p.Print("; ")
+	}
+	if x.Post != nil {
+		c.printStmt(x.Post)
+	}
+	c.disableEOL = false
+	c.p.Println(") {")
+	c.p.Indent()
+	c.printBlockStmt(x.Body)
+	c.p.Outdent()
+	c.p.Println("}")
+	return c.err()
 }
 
 func (c *javaContext) printRangeStmt(x *ast.RangeStmt) error {
@@ -673,4 +689,33 @@ func (c *javaContext) printPackage(x *ast.Package) error {
 	c.emitProp("Imports", x.Imports)
 	c.emitProp("Files", x.Files)
 	return c.nodeEnd()
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Others
+
+func (c *javaContext) printEOL() {
+	if c.disableEOL {
+		return
+	}
+	c.p.Println(";")
+}
+
+func (c *javaContext) printType(exprs ...ast.Expr) {
+	// TODO:
+	c.p.Print("var")
+}
+
+func (c *javaContext) printAssign(lhs, rhs ast.Expr, tok token.Token) {
+	switch tok {
+	case token.DEFINE:
+		c.printType(lhs, rhs)
+		c.p.Print(" ")
+		tok = token.ASSIGN
+		fallthrough
+	default:
+		c.printExpr(lhs)
+		c.p.Printf(" %s ", tok)
+		c.printExpr(rhs)
+	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"io"
 	"reflect"
@@ -96,8 +97,20 @@ func (c *dumpContext) emitProp(n string, v interface{}) {
 			}
 			c.propEnd()
 		}
+	case *ast.Object:
+		if x != nil {
+			c.propStart(n)
+			c.printObject(x)
+			c.propEnd()
+		}
+	case string:
+		if x != "" {
+			c.emit("+-%s: %v", n, v)
+		}
 	default:
-		c.emit("+-%s: %v", n, v)
+		if x != nil {
+			c.emit("+-%s: %v", n, v)
+		}
 	}
 }
 
@@ -671,5 +684,18 @@ func (c *dumpContext) printPackage(x *ast.Package) {
 	c.emitProp("Scope", x.Scope)
 	c.emitProp("Imports", x.Imports)
 	c.emitProp("Files", x.Files)
+	c.nodeEnd()
+}
+
+func (c *dumpContext) printObject(x *ast.Object) {
+	// TODO:
+	c.nodeStart("(Object)")
+	c.emitProp("Kind", x.Kind)
+	c.emitProp("Name", x.Name)
+	if x.Decl != nil {
+		c.emitProp("Decl", fmt.Sprintf("%#v", x.Decl))
+	}
+	c.emitProp("Data", x.Data)
+	c.emitProp("Type", x.Type)
 	c.nodeEnd()
 }

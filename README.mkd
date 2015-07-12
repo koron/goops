@@ -1,0 +1,23 @@
+# Goops (WIP)
+
+Goops converts golang snippet into other languages.
+
+    $ go build
+    
+    $ cat input/test-sum.go
+    sum := 0
+    for i := 1; i < n; i++ {
+            sum += i
+    }
+    return sum
+    
+    $ ./goops -l java < input/test-sum.go
+    int sum = 0;
+    for (int i = 1; i < n; i++) {
+        sum += i;
+    }
+    return sum;
+
+## License
+
+MIT

@@ -494,21 +494,33 @@ func (c *javaContext) printSelectStmt(x *ast.SelectStmt) error {
 }
 
 func (c *javaContext) printForStmt(x *ast.ForStmt) error {
-	c.disableEOL = true
-	c.p.Print("for (")
-	if x.Init != nil {
-		c.printStmt(x.Init)
-		c.p.Print("; ")
+	if x.Init == nil && x.Post == nil {
+		c.p.Print("while (")
+		if x.Cond != nil {
+			c.printExpr(x.Cond)
+		} else {
+			c.p.Print("true")
+		}
+		c.p.Println(") {")
+	} else {
+		c.p.Print("for (")
+		c.disableEOL = true
+		if x.Init != nil {
+			c.printStmt(x.Init)
+		}
+		c.p.Print(";")
+		if x.Cond != nil {
+			c.p.Print(" ")
+			c.printExpr(x.Cond)
+		}
+		c.p.Print(";")
+		if x.Post != nil {
+			c.p.Print(" ")
+			c.printStmt(x.Post)
+		}
+		c.disableEOL = false
+		c.p.Println(") {")
 	}
-	if x.Cond != nil {
-		c.printExpr(x.Cond)
-		c.p.Print("; ")
-	}
-	if x.Post != nil {
-		c.printStmt(x.Post)
-	}
-	c.disableEOL = false
-	c.p.Println(") {")
 	c.p.Indent()
 	c.printBlockStmt(x.Body)
 	c.p.Outdent()

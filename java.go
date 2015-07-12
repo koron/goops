@@ -13,15 +13,15 @@ var JavaPrinter = &javaPrinter{}
 type javaPrinter struct {
 }
 
-func (p *javaPrinter) Fprint(output io.Writer, list []ast.Stmt) error {
+func (p *javaPrinter) Fprint(output io.Writer, file *ast.File) error {
 	c := &javaContext{
 		p: indentPrinter{
 			Output:       output,
 			IndentString: "    ",
 		},
 	}
-	for _, x := range list {
-		if err := c.printStmt(x); err != nil {
+	for _, x := range file.Decls {
+		if err := c.printDecl(x); err != nil {
 			return err
 		}
 	}

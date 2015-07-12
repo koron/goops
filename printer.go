@@ -13,7 +13,7 @@ var printerMap = map[string]codePrinter{
 }
 
 type codePrinter interface {
-	Fprint(output io.Writer, list []ast.Stmt) error
+	Fprint(output io.Writer, file *ast.File) error
 }
 
 func getPrinter(lang string) codePrinter {

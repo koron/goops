@@ -1,0 +1,2 @@
+for x := range ch {
+}

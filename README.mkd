@@ -18,6 +18,10 @@ Goops converts golang snippet into other languages.
     }
     return sum;
 
+## Demo with Vim
+
+![](https://raw.githubusercontent.com/koron/goops/master/doc/goops-vim-java.gif)
+
 ## License
 
 MIT

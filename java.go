@@ -351,9 +351,9 @@ func (c *javaContext) printLabeledStmt(x *ast.LabeledStmt) error {
 }
 
 func (c *javaContext) printExprStmt(x *ast.ExprStmt) error {
-	c.nodeStart("ExprStmt")
-	c.emitProp("X", x.X)
-	return c.nodeEnd()
+	c.printExpr(x.X)
+	c.p.Println()
+	return c.err()
 }
 
 func (c *javaContext) printSendStmt(x *ast.SendStmt) error {

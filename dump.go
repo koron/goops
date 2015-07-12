@@ -3,6 +3,7 @@ package main
 import (
 	"go/ast"
 	"io"
+	"reflect"
 )
 
 // DumpPrinter is printer for debug.
@@ -54,36 +55,50 @@ func (c *dumpContext) propEnd() {
 }
 
 func (c *dumpContext) emitProp(n string, v interface{}) {
-	if v == nil {
-		return
-	}
-	if node, ok := v.(ast.Node); ok {
+	switch x := v.(type) {
+	case ast.Node:
+		if x == nil || reflect.ValueOf(x).IsNil() {
+			return
+		}
 		c.propStart(n)
-		c.printNode(node)
+		c.printNode(x)
 		c.propEnd()
-		return
-	}
-	if list, ok := v.([]ast.Expr); ok {
-		if len(list) > 0 {
+	case []ast.Expr:
+		if len(x) > 0 {
 			c.propStart(n)
-			for _, x := range list {
-				c.printExpr(x)
+			for _, y := range x {
+				c.printExpr(y)
 			}
 			c.propEnd()
 		}
 		return
-	}
-	if list, ok := v.([]ast.Stmt); ok {
-		if len(list) > 0 {
+	case []ast.Stmt:
+		if len(x) > 0 {
 			c.propStart(n)
-			for _, x := range list {
-				c.printStmt(x)
+			for _, y := range x {
+				c.printStmt(y)
 			}
 			c.propEnd()
 		}
-		return
+	case []ast.Decl:
+		if len(x) > 0 {
+			c.propStart(n)
+			for _, y := range x {
+				c.printDecl(y)
+			}
+			c.propEnd()
+		}
+	case []*ast.Field:
+		if len(x) > 0 {
+			c.propStart(n)
+			for _, y := range x {
+				c.printField(y)
+			}
+			c.propEnd()
+		}
+	default:
+		c.emit("+-%s: %v", n, v)
 	}
-	c.emit("+-%s: %v", n, v)
 }
 
 func (c *dumpContext) emitPropFn(n string, f func()) {

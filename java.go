@@ -404,9 +404,9 @@ func (c *javaContext) printReturnStmt(x *ast.ReturnStmt) error {
 		first := true
 		for _, expr := range x.Results {
 			if first {
-				c.p.Print(", ")
-			} else {
 				first = false
+			} else {
+				c.p.Print(", ")
 			}
 			c.printExpr(expr)
 		}

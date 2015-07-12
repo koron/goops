@@ -568,6 +568,7 @@ func (c *dumpContext) printValueSpec(x *ast.ValueSpec) {
 	c.emitProp("Type", x.Type)
 	c.emitProp("Values", x.Values)
 	c.emitProp("Comment", x.Comment)
+	c.nodeEnd()
 }
 
 func (c *dumpContext) printTypeSpec(x *ast.TypeSpec) {
@@ -576,6 +577,7 @@ func (c *dumpContext) printTypeSpec(x *ast.TypeSpec) {
 	c.emitProp("Name", x.Name)
 	c.emitProp("Type", x.Type)
 	c.emitProp("Comment", x.Comment)
+	c.nodeEnd()
 }
 
 ////////////////////////////////////////////////////////////////////////////

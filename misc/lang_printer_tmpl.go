@@ -6,14 +6,14 @@ import (
 	"io"
 )
 
-// JavaPrinter is printer for Java.
-var JavaPrinter = &javaPrinter{}
+// LangPrinter is printer template for a proggraming langauge.
+var LangPrinter = &langPrinter{}
 
-type javaPrinter struct {
+type langPrinter struct {
 }
 
-func (p *javaPrinter) Fprint(output io.Writer, list []ast.Stmt) error {
-	c := &javaContext{
+func (p *langPrinter) Fprint(output io.Writer, list []ast.Stmt) error {
+	c := &langContext{
 		p: indentPrinter{
 			Output:       output,
 			IndentString: "    ",
@@ -27,28 +27,28 @@ func (p *javaPrinter) Fprint(output io.Writer, list []ast.Stmt) error {
 	return nil
 }
 
-type javaContext struct {
+type langContext struct {
 	p   indentPrinter
 	err error
 }
 
-func (c *javaContext) nodeStart(n string) {
+func (c *langContext) nodeStart(n string) {
 }
 
-func (c *javaContext) nodeEnd() error {
+func (c *langContext) nodeEnd() error {
 	if c.err != nil {
 		return c.err
 	}
 	return c.p.Error()
 }
 
-func (c *javaContext) emitProp(n string, v interface{}) {
+func (c *langContext) emitProp(n string, v interface{}) {
 }
 
 ////////////////////////////////////////////////////////////////////////////
 // Expr
 
-func (c *javaContext) printExpr(expr ast.Expr) (err error) {
+func (c *langContext) printExpr(expr ast.Expr) (err error) {
 	switch x := expr.(type) {
 	case *ast.BadExpr:
 		err = c.printBadExpr(x)
@@ -100,66 +100,66 @@ func (c *javaContext) printExpr(expr ast.Expr) (err error) {
 	return err
 }
 
-func (c *javaContext) printBadExpr(x *ast.BadExpr) error {
+func (c *langContext) printBadExpr(x *ast.BadExpr) error {
 	c.nodeStart("BadExpr")
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printIdent(x *ast.Ident) error {
+func (c *langContext) printIdent(x *ast.Ident) error {
 	c.nodeStart("Ident")
 	c.emitProp("Name", x.Name)
 	c.emitProp("Obj", x.Obj)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printEllipsis(x *ast.Ellipsis) error {
+func (c *langContext) printEllipsis(x *ast.Ellipsis) error {
 	c.nodeStart("Ellipsis")
 	c.emitProp("Elt", x.Elt)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printBasicLit(x *ast.BasicLit) error {
+func (c *langContext) printBasicLit(x *ast.BasicLit) error {
 	c.nodeStart("BasicLit")
 	c.emitProp("Kind", x.Kind)
 	c.emitProp("Value", x.Value)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printFuncLit(x *ast.FuncLit) error {
+func (c *langContext) printFuncLit(x *ast.FuncLit) error {
 	c.nodeStart("FuncLit")
 	c.emitProp("Type", x.Type)
 	c.emitProp("Body", x.Body)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printCompositeLit(x *ast.CompositeLit) error {
+func (c *langContext) printCompositeLit(x *ast.CompositeLit) error {
 	c.nodeStart("CompositeLit")
 	c.emitProp("Type", x.Type)
 	c.emitProp("Elts", x.Elts)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printParenExpr(x *ast.ParenExpr) error {
+func (c *langContext) printParenExpr(x *ast.ParenExpr) error {
 	c.nodeStart("ParenExpr")
 	c.emitProp("X", x.X)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printSelectorExpr(x *ast.SelectorExpr) error {
+func (c *langContext) printSelectorExpr(x *ast.SelectorExpr) error {
 	c.nodeStart("SelectorExpr")
 	c.emitProp("X", x.X)
 	c.emitProp("Sel", x.Sel)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printIndexExpr(x *ast.IndexExpr) error {
+func (c *langContext) printIndexExpr(x *ast.IndexExpr) error {
 	c.nodeStart("IndexExpr")
 	c.emitProp("X", x.X)
 	c.emitProp("Index", x.Index)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printSliceExpr(x *ast.SliceExpr) error {
+func (c *langContext) printSliceExpr(x *ast.SliceExpr) error {
 	c.nodeStart("SliceExpr")
 	c.emitProp("X", x.X)
 	c.emitProp("Low", x.Low)
@@ -169,34 +169,34 @@ func (c *javaContext) printSliceExpr(x *ast.SliceExpr) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printTypeAssertExpr(x *ast.TypeAssertExpr) error {
+func (c *langContext) printTypeAssertExpr(x *ast.TypeAssertExpr) error {
 	c.nodeStart("TypeAssertExpr")
 	c.emitProp("X", x.X)
 	c.emitProp("Type", x.Type)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printCallExpr(x *ast.CallExpr) error {
+func (c *langContext) printCallExpr(x *ast.CallExpr) error {
 	c.nodeStart("CallExpr")
 	c.emitProp("Func", x.Fun)
 	c.emitProp("Args", x.Args)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printStarExpr(x *ast.StarExpr) error {
+func (c *langContext) printStarExpr(x *ast.StarExpr) error {
 	c.nodeStart("StarExpr")
 	c.emitProp("X", x.X)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printUnaryExpr(x *ast.UnaryExpr) error {
+func (c *langContext) printUnaryExpr(x *ast.UnaryExpr) error {
 	c.nodeStart("UnaryExpr")
 	c.emitProp("Op", x.Op)
 	c.emitProp("X", x.X)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printBinaryExpr(x *ast.BinaryExpr) error {
+func (c *langContext) printBinaryExpr(x *ast.BinaryExpr) error {
 	c.nodeStart("BinaryExpr")
 	c.emitProp("X", x.X)
 	c.emitProp("Op", x.Op)
@@ -204,49 +204,49 @@ func (c *javaContext) printBinaryExpr(x *ast.BinaryExpr) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printKeyValueExpr(x *ast.KeyValueExpr) error {
+func (c *langContext) printKeyValueExpr(x *ast.KeyValueExpr) error {
 	c.nodeStart("KeyValueExpr")
 	c.emitProp("Key", x.Key)
 	c.emitProp("Value", x.Value)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printArrayType(x *ast.ArrayType) error {
+func (c *langContext) printArrayType(x *ast.ArrayType) error {
 	c.nodeStart("ArrayType")
 	c.emitProp("Len", x.Len)
 	c.emitProp("Elt", x.Elt)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printStructType(x *ast.StructType) error {
+func (c *langContext) printStructType(x *ast.StructType) error {
 	c.nodeStart("StructType")
 	c.emitProp("FieldList", x.Fields)
 	c.emitProp("Incomplete", x.Incomplete)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printFuncType(x *ast.FuncType) error {
+func (c *langContext) printFuncType(x *ast.FuncType) error {
 	c.nodeStart("FuncType")
 	c.emitProp("Params", x.Params)
 	c.emitProp("Results", x.Results)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printInterfaceType(x *ast.InterfaceType) error {
+func (c *langContext) printInterfaceType(x *ast.InterfaceType) error {
 	c.nodeStart("InterfaceType")
 	c.emitProp("Methods", x.Methods)
 	c.emitProp("Incomplete", x.Incomplete)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printMapType(x *ast.MapType) error {
+func (c *langContext) printMapType(x *ast.MapType) error {
 	c.nodeStart("MapType")
 	c.emitProp("Key", x.Key)
 	c.emitProp("Value", x.Value)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printChanType(x *ast.ChanType) error {
+func (c *langContext) printChanType(x *ast.ChanType) error {
 	c.nodeStart("ChanType")
 	c.emitProp("Dir", x.Dir)
 	c.emitProp("Value", x.Value)
@@ -256,7 +256,7 @@ func (c *javaContext) printChanType(x *ast.ChanType) error {
 ////////////////////////////////////////////////////////////////////////////
 // Stmt
 
-func (c *javaContext) printStmt(stmt ast.Stmt) (err error) {
+func (c *langContext) printStmt(stmt ast.Stmt) (err error) {
 	switch x := stmt.(type) {
 	case *ast.BadStmt:
 		err = c.printBadStmt(x)
@@ -306,50 +306,50 @@ func (c *javaContext) printStmt(stmt ast.Stmt) (err error) {
 	return err
 }
 
-func (c *javaContext) printBadStmt(x *ast.BadStmt) error {
+func (c *langContext) printBadStmt(x *ast.BadStmt) error {
 	c.nodeStart("BadStmt")
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printDeclStmt(x *ast.DeclStmt) error {
+func (c *langContext) printDeclStmt(x *ast.DeclStmt) error {
 	c.nodeStart("DeclStmt")
 	c.emitProp("Decl", x.Decl)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printEmptyStmt(x *ast.EmptyStmt) error {
+func (c *langContext) printEmptyStmt(x *ast.EmptyStmt) error {
 	c.nodeStart("EmptyStmt")
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printLabeledStmt(x *ast.LabeledStmt) error {
+func (c *langContext) printLabeledStmt(x *ast.LabeledStmt) error {
 	c.nodeStart("LabeledStmt")
 	c.emitProp("Label", x.Label)
 	c.emitProp("Stmt", x.Stmt)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printExprStmt(x *ast.ExprStmt) error {
+func (c *langContext) printExprStmt(x *ast.ExprStmt) error {
 	c.nodeStart("ExprStmt")
 	c.emitProp("X", x.X)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printSendStmt(x *ast.SendStmt) error {
+func (c *langContext) printSendStmt(x *ast.SendStmt) error {
 	c.nodeStart("SendStmt")
 	c.emitProp("Chan", x.Chan)
 	c.emitProp("Value", x.Value)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printIncDecStmt(x *ast.IncDecStmt) error {
+func (c *langContext) printIncDecStmt(x *ast.IncDecStmt) error {
 	c.nodeStart("IncDecStmt")
 	c.emitProp("X", x.X)
 	c.emitProp("Tok", x.Tok)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printAssignStmt(x *ast.AssignStmt) error {
+func (c *langContext) printAssignStmt(x *ast.AssignStmt) error {
 	c.nodeStart("AssignStmt")
 	c.emitProp("Lhs", x.Lhs)
 	c.emitProp("Tok", x.Tok)
@@ -357,38 +357,38 @@ func (c *javaContext) printAssignStmt(x *ast.AssignStmt) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printGoStmt(x *ast.GoStmt) error {
+func (c *langContext) printGoStmt(x *ast.GoStmt) error {
 	c.nodeStart("GoStmt")
 	c.emitProp("Call", x.Call)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printDeferStmt(x *ast.DeferStmt) error {
+func (c *langContext) printDeferStmt(x *ast.DeferStmt) error {
 	c.nodeStart("DeferStmt")
 	c.emitProp("Call", x.Call)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printReturnStmt(x *ast.ReturnStmt) error {
+func (c *langContext) printReturnStmt(x *ast.ReturnStmt) error {
 	c.nodeStart("ReturnStmt")
 	c.emitProp("Results", x.Results)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printBranchStmt(x *ast.BranchStmt) error {
+func (c *langContext) printBranchStmt(x *ast.BranchStmt) error {
 	c.nodeStart("BranchStmt")
 	c.emitProp("Tok", x.Tok)
 	c.emitProp("Label", x.Label)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printBlockStmt(x *ast.BlockStmt) error {
+func (c *langContext) printBlockStmt(x *ast.BlockStmt) error {
 	c.nodeStart("BlockStmt")
 	c.emitProp("List", x.List)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printIfStmt(x *ast.IfStmt) error {
+func (c *langContext) printIfStmt(x *ast.IfStmt) error {
 	c.nodeStart("IfStmt")
 	c.emitProp("Init", x.Init)
 	c.emitProp("Cond", x.Cond)
@@ -397,14 +397,14 @@ func (c *javaContext) printIfStmt(x *ast.IfStmt) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printCaseClause(x *ast.CaseClause) error {
+func (c *langContext) printCaseClause(x *ast.CaseClause) error {
 	c.nodeStart("CaseClause")
 	c.emitProp("List", x.List)
 	c.emitProp("Body", x.Body)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printSwitchStmt(x *ast.SwitchStmt) error {
+func (c *langContext) printSwitchStmt(x *ast.SwitchStmt) error {
 	c.nodeStart("SwitchStmt")
 	c.emitProp("Init", x.Init)
 	c.emitProp("Tag", x.Tag)
@@ -412,7 +412,7 @@ func (c *javaContext) printSwitchStmt(x *ast.SwitchStmt) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printTypeSwitchStmt(x *ast.TypeSwitchStmt) error {
+func (c *langContext) printTypeSwitchStmt(x *ast.TypeSwitchStmt) error {
 	c.nodeStart("TypeSwitchStmt")
 	c.emitProp("Init", x.Init)
 	c.emitProp("Assign", x.Assign)
@@ -420,20 +420,20 @@ func (c *javaContext) printTypeSwitchStmt(x *ast.TypeSwitchStmt) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printCommClause(x *ast.CommClause) error {
+func (c *langContext) printCommClause(x *ast.CommClause) error {
 	c.nodeStart("CommClause")
 	c.emitProp("Comm", x.Comm)
 	c.emitProp("Body", x.Body)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printSelectStmt(x *ast.SelectStmt) error {
+func (c *langContext) printSelectStmt(x *ast.SelectStmt) error {
 	c.nodeStart("SelectStmt")
 	c.emitProp("Body", x.Body)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printForStmt(x *ast.ForStmt) error {
+func (c *langContext) printForStmt(x *ast.ForStmt) error {
 	c.nodeStart("ForStmt")
 	c.emitProp("Init", x.Init)
 	c.emitProp("Cond", x.Cond)
@@ -442,7 +442,7 @@ func (c *javaContext) printForStmt(x *ast.ForStmt) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printRangeStmt(x *ast.RangeStmt) error {
+func (c *langContext) printRangeStmt(x *ast.RangeStmt) error {
 	c.nodeStart("RangeStmt")
 	c.emitProp("Key", x.Key)
 	c.emitProp("Value", x.Value)
@@ -455,7 +455,7 @@ func (c *javaContext) printRangeStmt(x *ast.RangeStmt) error {
 ////////////////////////////////////////////////////////////////////////////
 // Decl
 
-func (c *javaContext) printDecl(decl ast.Decl) (err error) {
+func (c *langContext) printDecl(decl ast.Decl) (err error) {
 	switch x := decl.(type) {
 	case *ast.BadDecl:
 		err = c.printBadDecl(x)
@@ -469,12 +469,12 @@ func (c *javaContext) printDecl(decl ast.Decl) (err error) {
 	return err
 }
 
-func (c *javaContext) printBadDecl(x *ast.BadDecl) error {
+func (c *langContext) printBadDecl(x *ast.BadDecl) error {
 	c.nodeStart("BadDecl")
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printGenDecl(x *ast.GenDecl) error {
+func (c *langContext) printGenDecl(x *ast.GenDecl) error {
 	c.nodeStart("GenDecl")
 	c.emitProp("Doc", x.Doc)
 	c.emitProp("Tok", x.Tok)
@@ -482,7 +482,7 @@ func (c *javaContext) printGenDecl(x *ast.GenDecl) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printFuncDecl(x *ast.FuncDecl) error {
+func (c *langContext) printFuncDecl(x *ast.FuncDecl) error {
 	c.nodeStart("FuncDecl")
 	c.emitProp("Doc", x.Doc)
 	c.emitProp("Recv", x.Recv)
@@ -495,7 +495,7 @@ func (c *javaContext) printFuncDecl(x *ast.FuncDecl) error {
 ////////////////////////////////////////////////////////////////////////////
 // Spec
 
-func (c *javaContext) printSpec(spec ast.Spec) (err error) {
+func (c *langContext) printSpec(spec ast.Spec) (err error) {
 	switch x := spec.(type) {
 	case *ast.ImportSpec:
 		err = c.printImportSpec(x)
@@ -509,7 +509,7 @@ func (c *javaContext) printSpec(spec ast.Spec) (err error) {
 	return err
 }
 
-func (c *javaContext) printImportSpec(x *ast.ImportSpec) error {
+func (c *langContext) printImportSpec(x *ast.ImportSpec) error {
 	c.nodeStart("ImportSpec")
 	c.emitProp("Doc", x.Doc)
 	c.emitProp("Name", x.Name)
@@ -518,7 +518,7 @@ func (c *javaContext) printImportSpec(x *ast.ImportSpec) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printValueSpec(x *ast.ValueSpec) error {
+func (c *langContext) printValueSpec(x *ast.ValueSpec) error {
 	c.nodeStart("ValueSpec")
 	c.emitProp("Doc", x.Doc)
 	c.emitProp("Names", x.Names)
@@ -528,7 +528,7 @@ func (c *javaContext) printValueSpec(x *ast.ValueSpec) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printTypeSpec(x *ast.TypeSpec) error {
+func (c *langContext) printTypeSpec(x *ast.TypeSpec) error {
 	c.nodeStart("TypeSpec")
 	c.emitProp("Doc", x.Doc)
 	c.emitProp("Name", x.Name)
@@ -540,7 +540,7 @@ func (c *javaContext) printTypeSpec(x *ast.TypeSpec) error {
 ////////////////////////////////////////////////////////////////////////////
 // Node
 
-func (c *javaContext) printNode(node ast.Node) (err error) {
+func (c *langContext) printNode(node ast.Node) (err error) {
 	switch x := node.(type) {
 	case ast.Expr:
 		err = c.printExpr(x)
@@ -568,19 +568,19 @@ func (c *javaContext) printNode(node ast.Node) (err error) {
 	return err
 }
 
-func (c *javaContext) printComment(x *ast.Comment) error {
+func (c *langContext) printComment(x *ast.Comment) error {
 	c.nodeStart("Comment")
 	c.emitProp("Text", x.Text)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printCommentGroup(x *ast.CommentGroup) error {
+func (c *langContext) printCommentGroup(x *ast.CommentGroup) error {
 	c.nodeStart("CommentGroup")
 	c.emitProp("List", x.List)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printField(x *ast.Field) error {
+func (c *langContext) printField(x *ast.Field) error {
 	c.nodeStart("Field")
 	c.emitProp("Doc", x.Doc)
 	c.emitProp("Names", x.Names)
@@ -590,13 +590,13 @@ func (c *javaContext) printField(x *ast.Field) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printFieldList(x *ast.FieldList) error {
+func (c *langContext) printFieldList(x *ast.FieldList) error {
 	c.nodeStart("FieldList")
 	c.emitProp("List", x.List)
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printFile(x *ast.File) error {
+func (c *langContext) printFile(x *ast.File) error {
 	c.nodeStart("File")
 	c.emitProp("Doc", x.Doc)
 	c.emitProp("Name", x.Name)
@@ -608,7 +608,7 @@ func (c *javaContext) printFile(x *ast.File) error {
 	return c.nodeEnd()
 }
 
-func (c *javaContext) printPackage(x *ast.Package) error {
+func (c *langContext) printPackage(x *ast.Package) error {
 	c.nodeStart("Package")
 	c.emitProp("Name", x.Name)
 	c.emitProp("Scope", x.Scope)

@@ -713,16 +713,58 @@ func (c *javaContext) printEOL() {
 	c.p.Println(";")
 }
 
-func (c *javaContext) printType(exprs ...ast.Expr) {
-	// TODO:
-	c.p.Print("var")
+func (c *javaContext) kindToType(t token.Token) string {
+	switch t {
+	case token.INT:
+		return "int"
+	case token.FLOAT:
+		return "float"
+	case token.CHAR:
+		return "char"
+	case token.STRING:
+		return "String"
+	default:
+		return ""
+	}
+
+}
+
+func (c *javaContext) estimateType(x ast.Expr) string {
+	switch v := x.(type) {
+
+	case *ast.Ident:
+		if v.Obj != nil {
+			return ""
+		}
+		if v.Obj.Kind == ast.Typ {
+			return v.Obj.Name
+		}
+		return ""
+
+	case *ast.BasicLit:
+		return c.kindToType(v.Kind)
+
+	// TODO: support more ast.Expr
+
+	default:
+		return ""
+	}
+}
+
+func (c *javaContext) estimateTypes(a ...ast.Expr) string {
+	for _, x := range a {
+		if t := c.estimateType(x); t != "" {
+			return t
+		}
+	}
+	return "var"
 }
 
 func (c *javaContext) printAssign(lhs, rhs ast.Expr, tok token.Token) {
 	switch tok {
 	case token.DEFINE:
-		c.printType(lhs, rhs)
-		c.p.Print(" ")
+		t := c.estimateTypes(lhs, rhs)
+		c.p.Print(t, " ")
 		tok = token.ASSIGN
 		fallthrough
 	default:

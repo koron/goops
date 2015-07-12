@@ -7,6 +7,10 @@ import (
 	"io"
 )
 
+func init() {
+	printerMap["go"] = GoPrinter
+}
+
 // GoPrinter is printer for golang.
 var GoPrinter = &goPrinter{}
 

@@ -7,6 +7,10 @@ import (
 	"reflect"
 )
 
+func init() {
+	printerMap["dump"] = DumpPrinter
+}
+
 // DumpPrinter is printer for debug.
 var DumpPrinter = &dumpPrinter{}
 

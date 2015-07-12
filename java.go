@@ -7,6 +7,10 @@ import (
 	"io"
 )
 
+func init() {
+	printerMap["java"] = JavaPrinter
+}
+
 // JavaPrinter is printer for Java.
 var JavaPrinter = &javaPrinter{}
 

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"io"
 )
 
@@ -28,20 +29,31 @@ func (p *javaPrinter) Fprint(output io.Writer, list []ast.Stmt) error {
 }
 
 type javaContext struct {
-	p   indentPrinter
-	err error
+	p indentPrinter
+	e error
 }
 
-func (c *javaContext) nodeStart(n string) {
-}
-
-func (c *javaContext) nodeEnd() error {
-	if c.err != nil {
-		return c.err
+func (c *javaContext) err() error {
+	if c.e != nil {
+		return c.e
 	}
 	return c.p.Error()
 }
 
+// dummy function
+func (c *javaContext) nodeStart(n string) {
+	c.p.Printf("[[%s]]", n)
+}
+
+// dummy function
+func (c *javaContext) nodeEnd() error {
+	if c.e != nil {
+		return c.e
+	}
+	return c.p.Error()
+}
+
+// dummy function
 func (c *javaContext) emitProp(n string, v interface{}) {
 }
 
@@ -106,10 +118,9 @@ func (c *javaContext) printBadExpr(x *ast.BadExpr) error {
 }
 
 func (c *javaContext) printIdent(x *ast.Ident) error {
-	c.nodeStart("Ident")
-	c.emitProp("Name", x.Name)
-	c.emitProp("Obj", x.Obj)
-	return c.nodeEnd()
+	c.p.Print(x.Name)
+	// TODO: consider x.Obj
+	return c.err()
 }
 
 func (c *javaContext) printEllipsis(x *ast.Ellipsis) error {
@@ -119,10 +130,9 @@ func (c *javaContext) printEllipsis(x *ast.Ellipsis) error {
 }
 
 func (c *javaContext) printBasicLit(x *ast.BasicLit) error {
-	c.nodeStart("BasicLit")
-	c.emitProp("Kind", x.Kind)
-	c.emitProp("Value", x.Value)
-	return c.nodeEnd()
+	c.p.Print(x.Value)
+	// TODO: consider x.Kind
+	return c.err()
 }
 
 func (c *javaContext) printFuncLit(x *ast.FuncLit) error {
@@ -190,18 +200,29 @@ func (c *javaContext) printStarExpr(x *ast.StarExpr) error {
 }
 
 func (c *javaContext) printUnaryExpr(x *ast.UnaryExpr) error {
-	c.nodeStart("UnaryExpr")
-	c.emitProp("Op", x.Op)
-	c.emitProp("X", x.X)
-	return c.nodeEnd()
+	c.p.Print(x.Op)
+	c.printExpr(x.X)
+	return c.err()
 }
 
 func (c *javaContext) printBinaryExpr(x *ast.BinaryExpr) error {
-	c.nodeStart("BinaryExpr")
-	c.emitProp("X", x.X)
-	c.emitProp("Op", x.Op)
-	c.emitProp("Y", x.Y)
-	return c.nodeEnd()
+	// special case: String#equals()
+	if y, ok := x.Y.(*ast.BasicLit); (x.Op == token.EQL || x.Op == token.NEQ) &&
+		ok && y.Kind == token.STRING {
+		if x.Op == token.NEQ {
+			c.p.Print("!")
+		}
+		c.printExpr(x.X)
+		c.p.Print(".equals(")
+		c.printExpr(x.Y)
+		c.p.Print(")")
+		return c.err()
+	}
+	// normal case
+	c.printExpr(x.X)
+	c.p.Print(x.Op)
+	c.printExpr(x.Y)
+	return c.err()
 }
 
 func (c *javaContext) printKeyValueExpr(x *ast.KeyValueExpr) error {
@@ -370,9 +391,28 @@ func (c *javaContext) printDeferStmt(x *ast.DeferStmt) error {
 }
 
 func (c *javaContext) printReturnStmt(x *ast.ReturnStmt) error {
-	c.nodeStart("ReturnStmt")
-	c.emitProp("Results", x.Results)
-	return c.nodeEnd()
+	switch len(x.Results) {
+	case 0:
+		c.p.Println("return;")
+	case 1:
+		c.p.Print("return ")
+		c.printExpr(x.Results[0])
+		c.p.Println(";")
+	default:
+		c.p.Println("// FIXME: return accepts only one value.")
+		c.p.Print("return (")
+		first := true
+		for _, expr := range x.Results {
+			if first {
+				c.p.Print(", ")
+			} else {
+				first = false
+			}
+			c.printExpr(expr)
+		}
+		c.p.Println(");")
+	}
+	return c.err()
 }
 
 func (c *javaContext) printBranchStmt(x *ast.BranchStmt) error {
@@ -383,18 +423,36 @@ func (c *javaContext) printBranchStmt(x *ast.BranchStmt) error {
 }
 
 func (c *javaContext) printBlockStmt(x *ast.BlockStmt) error {
-	c.nodeStart("BlockStmt")
-	c.emitProp("List", x.List)
-	return c.nodeEnd()
+	for _, stmt := range x.List {
+		if err := c.printStmt(stmt); err != nil {
+			return err
+		}
+	}
+	return c.err()
 }
 
 func (c *javaContext) printIfStmt(x *ast.IfStmt) error {
-	c.nodeStart("IfStmt")
-	c.emitProp("Init", x.Init)
-	c.emitProp("Cond", x.Cond)
-	c.emitProp("Body", x.Body)
-	c.emitProp("Else", x.Else)
-	return c.nodeEnd()
+	if x.Init != nil {
+		c.printStmt(x.Init)
+	}
+	c.p.Print("if (")
+	if x.Cond != nil {
+		c.printExpr(x.Cond)
+	}
+	c.p.Println(") {")
+	if x.Body != nil {
+		c.p.Indent()
+		c.printStmt(x.Body)
+		c.p.Outdent()
+	}
+	if x.Else != nil {
+		c.p.Println("} else {")
+		c.p.Indent()
+		c.printStmt(x.Body)
+		c.p.Outdent()
+	}
+	c.p.Println("}")
+	return c.err()
 }
 
 func (c *javaContext) printCaseClause(x *ast.CaseClause) error {

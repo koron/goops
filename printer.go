@@ -6,11 +6,7 @@ import (
 	"strings"
 )
 
-var printerMap = map[string]codePrinter{
-	"go":   GoPrinter,
-	"dump": DumpPrinter,
-	"java": JavaPrinter,
-}
+var printerMap = map[string]codePrinter{}
 
 type codePrinter interface {
 	Fprint(output io.Writer, list []ast.Stmt) error

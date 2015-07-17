@@ -101,6 +101,14 @@ func (c *dumpContext) emitProp(n string, v interface{}) {
 			}
 			c.propEnd()
 		}
+	case []ast.Spec:
+		if len(x) > 0 {
+			c.propStart(n)
+			for _, y := range x {
+				c.printSpec(y)
+			}
+			c.propEnd()
+		}
 	case *ast.Object:
 		if x != nil {
 			c.propStart(n)

@@ -193,10 +193,20 @@ func (c *javaContext) printTypeAssertExpr(x *ast.TypeAssertExpr) error {
 }
 
 func (c *javaContext) printCallExpr(x *ast.CallExpr) error {
-	c.nodeStart("CallExpr")
-	c.emitProp("Func", x.Fun)
-	c.emitProp("Args", x.Args)
-	return c.nodeEnd()
+	c.printExpr(x.Fun)
+	c.p.Print("(")
+	first := true
+	for _, i := range x.Args {
+		if first {
+			first = false
+		} else {
+			c.p.Print(", ")
+		}
+		c.printExpr(i)
+	}
+	c.p.Print(")")
+	c.printEOL()
+	return c.err()
 }
 
 func (c *javaContext) printStarExpr(x *ast.StarExpr) error {
@@ -339,9 +349,9 @@ func (c *javaContext) printBadStmt(x *ast.BadStmt) error {
 }
 
 func (c *javaContext) printDeclStmt(x *ast.DeclStmt) error {
-	c.nodeStart("DeclStmt")
-	c.emitProp("Decl", x.Decl)
-	return c.nodeEnd()
+	c.printDecl(x.Decl)
+	c.printEOL()
+	return c.err()
 }
 
 func (c *javaContext) printEmptyStmt(x *ast.EmptyStmt) error {
@@ -565,11 +575,41 @@ func (c *javaContext) printBadDecl(x *ast.BadDecl) error {
 }
 
 func (c *javaContext) printGenDecl(x *ast.GenDecl) error {
-	c.nodeStart("GenDecl")
-	c.emitProp("Doc", x.Doc)
-	c.emitProp("Tok", x.Tok)
-	c.emitProp("Specs", x.Specs)
-	return c.nodeEnd()
+	switch x.Tok {
+	case token.VAR:
+		// XXX: implement var declaration
+		first := true
+		for _, y := range x.Specs {
+			vs, ok := y.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+			t := c.estimateTypes(vs.Type)
+			for i, n := range vs.Names {
+				if first {
+					first = false
+				} else {
+					c.printEOL()
+				}
+				c.p.Printf("%s %s", t, n)
+				if i >= len(vs.Values) && vs.Values[i] != nil {
+					continue
+				}
+				c.p.Print(" = ")
+				c.printExpr(vs.Values[i])
+			}
+		}
+
+	// TODO: implement IMPORT, CONST and TYPE
+
+	default:
+		c.nodeStart("GenDecl")
+		c.emitProp("Doc", x.Doc)
+		c.emitProp("Tok", x.Tok)
+		c.emitProp("Specs", x.Specs)
+		return c.nodeEnd()
+	}
+	return c.err()
 }
 
 func (c *javaContext) printFuncDecl(x *ast.FuncDecl) error {
